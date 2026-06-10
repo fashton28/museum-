@@ -1,4 +1,4 @@
-# The Scaling Era 
+#  Continuum 
 
 ![The Future of Humanity](public/github.png)
 
