@@ -1,0 +1,161 @@
+:root {
+  --blue: #1a0dd9;
+  --blue-deep: #1208a8;
+  --cream: #efe7d2;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--blue);
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-mono), 'Courier New', monospace;
+  color: var(--cream);
+  -webkit-font-smoothing: antialiased;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+}
+
+.stage canvas {
+  display: block;
+}
+
+/* ---------- modal overlay ---------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(18, 8, 168, 0.28);
+  backdrop-filter: blur(38px) saturate(1.15);
+  -webkit-backdrop-filter: blur(38px) saturate(1.15);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.overlay--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.overlay__panel {
+  width: min(68vw, 1180px);
+  box-shadow: 0 0 80px rgba(5, 0, 60, 0.45);
+}
+
+.overlay__titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: #2516e0;
+  color: var(--cream);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+}
+
+.overlay__titlebar button {
+  background: none;
+  border: none;
+  color: var(--cream);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  opacity: 0.85;
+}
+
+.overlay__titlebar button:hover {
+  opacity: 1;
+}
+
+.sep {
+  opacity: 0.6;
+  margin: 0 0.6em;
+}
+
+.overlay__media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #06032e;
+}
+
+.overlay__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(1) brightness(1.12) contrast(1.05);
+}
+
+.overlay__tint {
+  position: absolute;
+  inset: 0;
+  background: #2b1bf0;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.overlay__lift {
+  position: absolute;
+  inset: 0;
+  background: #8a5cff;
+  mix-blend-mode: screen;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+/* ---------- sound toggle ---------- */
+
+.sound {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 20;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(239, 231, 210, 0.5);
+  background: rgba(26, 13, 217, 0.35);
+  color: var(--cream);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.sound:hover {
+  border-color: var(--cream);
+}
+
+.sound svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    transition: none;
+  }
+}
