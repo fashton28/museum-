@@ -1,4 +1,4 @@
-# The Scaling Era — replica
+# The Scaling Era 
 
 A one-to-one frontend replica of the Stripe Press ["The Scaling Era"](https://press.stripe.com) experience: a terraced text vortex with a central column, scroll-driven descent with a liquid warp distortion, glowing clickable interview tiles, and a fullscreen modal over a blurred live scene.
 
