@@ -154,6 +154,18 @@ body {
   height: 18px;
 }
 
+/* ---------- background video (ambient soundtrack — audible, not visible) ---------- */
+
+.bg-video {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 320px;
+  height: 180px;
+  border: 0;
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .overlay {
     transition: none;

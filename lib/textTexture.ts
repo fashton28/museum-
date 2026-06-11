@@ -77,15 +77,16 @@ export function createFunnelTexture(edgeVs: number[] = []): THREE.CanvasTexture 
     }
   }
 
-  // glowing ring lines — they flow with the pour like streaks in the liquid
-  // (v-axis is flipped on the geometry: arc position ev sits at canvas y = ev·H)
+  // faint ring lines — whisper-thin streaks in the liquid. Kept dim on purpose:
+  // bright rims at every seam made the trumpet read as stacked discs instead of
+  // one continuous pour. (v-axis is flipped: arc position ev sits at y = ev·H)
   ctx.globalAlpha = 1;
   for (const ev of edgeVs) {
     const ly = ev * H;
-    ctx.fillStyle = 'rgba(239, 231, 210, 0.55)';
-    ctx.fillRect(0, ly - 2, W, 4);
-    ctx.fillStyle = 'rgba(239, 231, 210, 0.18)';
-    ctx.fillRect(0, ly - 6, W, 12);
+    ctx.fillStyle = 'rgba(239, 231, 210, 0.28)';
+    ctx.fillRect(0, ly - 1, W, 2);
+    ctx.fillStyle = 'rgba(239, 231, 210, 0.09)';
+    ctx.fillRect(0, ly - 4, W, 8);
   }
 
   const texture = new THREE.CanvasTexture(canvas);

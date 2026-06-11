@@ -47,8 +47,11 @@ const R_FLARE_END = 30;
 const R_LIP = 30; // beyond here the floor curves back UP — fills the horizon, no sky
 const R_RIM = 46;
 const Y_TOP = 20;
-const FLARE_K = 10.4;
-const FLARE_Q = 0.32; // < 1 → vertical tangent at the tube, flattening outward — low q = TALL tower
+const FLARE_K = 6.76;
+const FLARE_Q = 0.45; // < 1 → vertical tangent at the tube, flattening outward.
+// q raised 0.32 → 0.45 (K rebalanced so y(R_LIP) = −10 is unchanged): spreads the
+// bend down the whole form instead of bunching it at the tube→flare knee, so the
+// silhouette widens continuously — one liquid pour, no "knee".
 const N_BANDS = 10;
 
 /**
@@ -178,6 +181,14 @@ for (const b of bands) b.vMid = 1 - (arcLen[b.i0] + arcLen[b.i1]) / 2;
 /** The absorption ripple — keep in sync with the GLSL in Funnel.tsx! */
 export const RIPPLE = { freq: 80, speed: 0.92, amp: 0.5 };
 
+/**
+ * THE ABSORPTION — a broad, slow heave forever drawing the liquid UP toward
+ * the tube tip, with a slight radial pinch where each crest passes (suction).
+ * Axisymmetric and untapered, so it is continuous across every ring seam.
+ * Keep in sync with the GLSL in Funnel.tsx!
+ */
+export const SWELL = { freq: 22, speed: 0.34, amp: 1.4, pinch: 0.02 };
+
 /** Normalized arc positions of terrace lip edges — drawn as glow lines in the texture. */
 export const edgeVs = edgeIdx.map((i) => arcLen[i]);
 
@@ -279,12 +290,14 @@ export function getTileTransform(
   // follow the ring's liquid wobble (band surface sits at ~0.8 of the boundary taper)
   const TAPER = 0.8;
   const { dy, rs } = wobbleAt(band.ringIndex, band.rMid, th, flow);
-  // ride the upward-traveling absorption swell too (same wave as the shader)
-  const ripple = Math.sin(band.vMid * RIPPLE.freq - time * RIPPLE.speed + th * 2) * RIPPLE.amp;
-  const rWob = band.rMid * (1 + (rs - 1) * TAPER);
+  // ride the upward-traveling absorption waves too (same math as the shader:
+  // axisymmetric and UNTAPERED — continuous across ring seams)
+  const ripple = Math.sin(band.vMid * RIPPLE.freq - time * RIPPLE.speed) * RIPPLE.amp;
+  const swell = Math.sin(band.vMid * SWELL.freq - time * SWELL.speed);
+  const rWob = band.rMid * (1 + (rs - 1) * TAPER - swell * SWELL.pinch);
   const position = new THREE.Vector3(
     rWob * cos,
-    band.yMid + (dy + ripple * 0.062 * band.rMid) * TAPER,
+    band.yMid + dy * TAPER + (ripple + swell * SWELL.amp) * 0.062 * band.rMid,
     rWob * sin,
   ).addScaledVector(normal, lift);
 

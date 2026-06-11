@@ -48,9 +48,10 @@ function RingGroup({ ring, index, texture }: { ring: RingDef; index: number; tex
   }, [ring]);
   useEffect(() => () => geometry.dispose(), [geometry]);
 
-  // slight per-ring brightness variation — sells the "stacked rings" read
+  // barely-there per-ring brightness variation — enough to feel alive, subtle
+  // enough that the trumpet reads as ONE continuous liquid sheet, not stacked discs
   const tint = useMemo(() => {
-    const b = 0.92 + ((index * 37) % 5) * 0.035;
+    const b = 0.975 + ((index * 37) % 5) * 0.0125;
     return new THREE.Color(b, b, b);
   }, [index]);
 
@@ -79,14 +80,21 @@ if (vRr > 0.05) {
   float th = atan(transformed.z, transformed.x);
   float f = clamp((uv.y - uTaper.x) / max(uTaper.y - uTaper.x, 1e-5), 0.0, 1.0);
   float taper = sin(3.14159265 * f);
-  float w = sin(2.0 * th + uPhase.x) * 0.6 + sin(3.0 * th + uPhase.y) * 0.3 + sin(5.0 * th + uPhase.z) * 0.15;
-  // the abduction swell: crests forever traveling UP the surface (toward
-  // +uv.y = the tube tip), as if drawn up from above. Sync: RIPPLE in funnelProfile.ts
-  w += sin(uv.y * 80.0 - uTime * 0.92 + th * 2.0) * 0.5;
-  float rs = 1.0 + (0.018 * sin(3.0 * th + uPhase.y) + 0.01 * sin(2.0 * th + uPhase.x)) * taper;
+  float w = (sin(2.0 * th + uPhase.x) * 0.6 + sin(3.0 * th + uPhase.y) * 0.3 + sin(5.0 * th + uPhase.z) * 0.15) * taper;
+  // fine abduction ripple: small fast crests traveling UP the surface (toward
+  // +uv.y = the tube tip). Axisymmetric (no th term) so it is identical for
+  // adjacent rings on their shared circle no matter how they rotate — it runs
+  // UNTAPERED, continuous over the whole trumpet. Sync: RIPPLE in funnelProfile.ts
+  w += sin(uv.y * 80.0 - uTime * 0.92) * 0.5;
+  // THE ABSORPTION: a broad SLOW heave forever drawing the liquid up toward the
+  // tip, with a slight radial pinch where each crest passes — like suction.
+  // Also axisymmetric + untapered. Sync: SWELL in funnelProfile.ts
+  float swell = sin(uv.y * 22.0 - uTime * 0.34);
+  w += swell * 1.4;
+  float rs = 1.0 + (0.018 * sin(3.0 * th + uPhase.y) + 0.01 * sin(2.0 * th + uPhase.x)) * taper - swell * 0.02;
   transformed.x *= rs;
   transformed.z *= rs;
-  transformed.y += w * 0.062 * vRr * taper;
+  transformed.y += w * 0.062 * vRr;
 }`,
         );
       shader.fragmentShader = shader.fragmentShader
@@ -107,9 +115,13 @@ float blendT = smoothstep(0.35, 0.65, fract(rr));
 vec4 cA = texture2D(map, vec2(vMapUv.x * repsA, vMapUv.y));
 vec4 cB = texture2D(map, vec2(vMapUv.x * (repsA + 1.0), vMapUv.y));
 vec4 sampledDiffuseColor = mix(cA, cB, blendT);
-// the absorption beam: broad bands of light forever climbing the funnel
+// the absorption light: bands forever climbing the funnel, pulling HARDER near
+// the tip (vMapUv.y → 1 at the tube top), plus a glow riding the slow geometric
+// swell crest so the heave reads as mass being drawn up. Sync: SWELL in funnelProfile.ts
 // (continuous across rings — vMapUv.y is the global profile coordinate)
-sampledDiffuseColor.rgb *= 1.0 + 0.15 * sin(vMapUv.y * 48.0 - uTime * 0.55);
+float pull = 0.12 + 0.25 * vMapUv.y * vMapUv.y;
+sampledDiffuseColor.rgb *= 1.0 + pull * sin(vMapUv.y * 48.0 - uTime * 0.55)
+                               + 0.16 * sin(vMapUv.y * 22.0 - uTime * 0.34);
 diffuseColor *= sampledDiffuseColor;`,
         );
     };
