@@ -1,7 +1,5 @@
 'use client';
-
 import dynamic from 'next/dynamic';
-import BackgroundVideo from './ui/BackgroundVideo';
 import Overlay from './ui/Overlay';
 import SoundToggle from './ui/SoundToggle';
 
@@ -14,7 +12,6 @@ export default function Home() {
       <Experience />
       <Overlay />
       <SoundToggle />
-      <BackgroundVideo />
     </main>
   );
 }
